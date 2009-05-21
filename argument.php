@@ -1,25 +1,23 @@
 <?php
 
 $possibleArgs = array(new Help(), new Loop(), );
-
-class ArgumentChecker {
-    public $foundArguments;
     
-    public function checkArguments( $args ) {
-        foreach( $args as $arg ) {
-            global $possibleArgs;
+function findArguments( $args ) {
+    $foundArguments = false;
 
-            foreach( $possibleArgs as $possibleArg ) {
-                if( $possibleArg->matches($arg) ) {
-                    $this->foundArguments = true;
-                    $possibleArg->execute();
-                    break;
-                }
+    foreach( $args as $arg ) {
+        global $possibleArgs;
+
+        foreach( $possibleArgs as $possibleArg ) {
+            if( $possibleArg->matches($arg) ) {
+                $possibleArg->execute();
+                $foundArguments = true;
+                break;
             }
         }
-
-        $this->foundArguments = false;
     }
+
+    return $foundArguments;
 }
 
 abstract class Argument {
@@ -66,7 +64,16 @@ class Loop extends Argument {
     public $helpText = "Execute tests automatically as files are changed.";
 
     public function execute() {
-        print 'should do the loop thingy now';
+        $tests = findTests();
+        runTests($tests);
+        
+        $psLine = fgets(STDIN, 1024);
+        $stdin = fopen("php://stdin", "r");
+        while(true) {
+            runTests($tests);
+            
+            $l = fgets($stdin);
+        }
     }
 }
 ?>

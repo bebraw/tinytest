@@ -3,9 +3,10 @@
 
 $author = "Juho Vepsäläinen";
 $programName = "TinyTest";
-$version = "0.02";
+$version = "0.03";
 
 require("argument.php");
+require("test.php");
 require("utils.php");
 
 $application = new Application();
@@ -16,10 +17,9 @@ class Application {
         setup_assert();
     }
     public function run() {
-        $argumentChecker = new ArgumentChecker();
-        $argumentChecker->checkArguments($argv);
+        global $argv;
 
-        if( !$argumentChecker->foundArguments ) {
+        if( !findArguments($argv) ) {
             runTests(findTests());
         }
     }
