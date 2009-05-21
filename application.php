@@ -21,7 +21,7 @@
 
 $author = "Juho Vepsäläinen";
 $programName = "TinyTest";
-$version = "0.10";
+$version = "0.15";
 $year = 2009;
 
 /**

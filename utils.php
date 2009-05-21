@@ -32,17 +32,20 @@ function setup_assert() {
     assert_options(ASSERT_CALLBACK,   'assert_callcack');
 }
 
-function loadFunctions( $file ) {
+function loadClassesAndFunctions( $file ) {
+    $prev_classes = get_declared_classes();
     $prev_funcs = get_defined_functions();
     $prev_funcs = $prev_funcs["user"];
 
     require($file);
 
+    $cur_classes = get_declared_classes();
     $cur_funcs = get_defined_functions();
     $cur_funcs = $cur_funcs["user"];
 
+    $added_classes = array_diff($cur_classes, $prev_classes);
     $added_funcs = array_diff($cur_funcs, $prev_funcs);
 
-    return $added_funcs;
+    return array($added_classes, $added_funcs);
 }
 ?>

@@ -22,7 +22,7 @@ function findTests( $dir=NULL ) { # this can be run only once as TestFiles load 
     if( !$dir) {
         $dir = dirname(__FILE__);
     }
-    
+
     $dirHandler = opendir($dir);
     $tests = array();
 
@@ -31,8 +31,8 @@ function findTests( $dir=NULL ) { # this can be run only once as TestFiles load 
             $tests = array_merge($tests, findTests($dir . "/" . $fileName));
         }
         else if( preg_match("/_test.php$/", $fileName) ) {
-            $tests[] = new TestFile($dir, $fileName);
-        }
+                $tests[] = new TestFile($dir, $fileName);
+            }
     }
 
     closedir($dirHandler);
@@ -51,7 +51,7 @@ function findFileInTests( $file, $tests ) {
 function runTests( $tests ) {
     $testsPassed = 0;
     $testsRun = 0;
-    
+
     foreach( $tests as $test ) {
         $test->run();
         $testsRun += $test->testsRun;
@@ -101,14 +101,14 @@ class TestFile {
         print $this->fileName . " tests:\n";
 
         foreach( $this->tests as $test ) {
-            $testStr = "  " . $test . " ";
+            $testStr = "  " . $test->name . " ";
             print $testStr;
 
             $testStrLen = strlen($testStr);
             print getNchars(30-$testStrLen, " ");
 
             try {
-                $test();
+                $test->run();
                 print "OK";
                 $this->testsPassed++;
             } catch (Exception $e) {
@@ -122,16 +122,59 @@ class TestFile {
     }
 
     private function loadTests() {
-        $functions = loadFunctions($this->getWholeName());
-        $tests = array();
+        $this->tests = array();
+        list ($classes, $functions) = loadClassesAndFunctions($this->getWholeName());
 
-        foreach( $functions as $function ) {
-            if( preg_match("/^test_/", $function) ) {
-                $tests[] = $function;
+        foreach( $classes as $class ) {
+            if( preg_match("/^Test/", $class) ) {
+                $methods = get_class_methods($class);
+                foreach( $methods as $method ) {
+                    if( preg_match("/^test_/", $method) ) {
+                        $this->tests[] = new TestMethod($method, $class);
+                    }
+                }
             }
         }
+        
+        foreach( $functions as $function ) {
+            if( preg_match("/^test_/", $function) ) {
+                $this->tests[] = new TestFunction($function);
+            }
+        }
+    }
+}
 
-        $this->tests = $tests;
+abstract class Test {
+    public $name;
+
+    public function __construct( $name ) {
+        $this->name = $name;
+    }
+
+    abstract public function run();
+}
+
+class TestFunction extends Test {
+    public function run() {
+        $function = $this->name;
+
+        $function();
+    }
+}
+
+class TestMethod extends Test {
+    private $class;
+
+    public function __construct( $name, $class ) {
+        $this->name = $name;
+        $this->class = $class;
+    }
+
+    public function run() {
+        $instance = new $this->class();
+        $method = $this->name;
+
+        $instance->$method();
     }
 }
 

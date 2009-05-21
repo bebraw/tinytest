@@ -98,7 +98,9 @@ class Help extends Argument {
         print $emptyArea . "'tinytest.py <filename>'\n";
         print $emptyArea . "'tinytest.py'\n\n";
         print "Note that test files must be named using 'test' suffix (ie. utils_test.php).\n";
-        print "Test functions contained in the test files must have 'test' prefix (ie. test_sum).\n\n";
+        print "Test functions contained in the test files must have 'test' prefix (ie. test_sum).\n";
+        print "Test classes must be named using 'Test' prefix (ie. TestVector). Methods must be \n";
+        print "named in the same manner as functions.\n\n";
         print "Possible arguments:\n";
         foreach( $possibleArgs as $possibleArg ) {
             if ( $possibleArg->renderable ) {

@@ -18,14 +18,17 @@
  *
  */
 
-require("mathutils.php");
+require("vector.php");
 
-function test_sum() {
-    assert("sum(3, 5) == 8");
-    assert("sum(1, 1) == 2");
+class TestVector {
+    function test_create() {
+        $vector = new Vector(0.0, 0.0, 0.0, 0.0);
+
+        assert("$vector->x == 0");
+        assert("$vector->y == 0");
+        assert("$vector->z == 0");
+        assert("$vector->w == 0");
+    }
 }
 
-function test_sum_and_fail() {
-    assert("sum(1, 1) == 2");
-}
 ?>
