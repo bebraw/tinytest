@@ -23,6 +23,7 @@ function findArguments( $args ) {
 abstract class Argument {
     protected $callName;
     public $helpText;
+    public $renderable = true;
 
     abstract public function run();
 
@@ -31,10 +32,6 @@ abstract class Argument {
     }
 
     public function matches( $argument ) {
-        if( !$this->callName ) {
-            return false;
-        }
-
         $callNames = $this->getCallNames();
 
         foreach( $callNames as $callName ) {
@@ -46,8 +43,7 @@ abstract class Argument {
 }
 
 class File extends Argument {
-    protected $callName = NULL;
-    public $helpText = NULL;
+    public $renderable = false;
     private $test;
 
     public function run() {
@@ -75,10 +71,12 @@ class Help extends Argument {
         print $programName . " " . $version . " by " . $author . ".\n\n";
         print "Possible arguments:\n";
         foreach( $possibleArgs as $possibleArg ) {
-            $callNames = $possibleArg->getCallNames();
-            $callNameStr = str_pad($callNames[0] . ", " . $callNames[1], 16, " ", STR_PAD_LEFT);
+            if ( $possibleArg->renderable ) {
+                $callNames = $possibleArg->getCallNames();
+                $callNameStr = str_pad($callNames[0] . ", " . $callNames[1], 16, " ", STR_PAD_LEFT);
 
-            print $callNameStr . " - " . $possibleArg->helpText . "\n";
+                print $callNameStr . " - " . $possibleArg->helpText . "\n";
+            }
         }
     }
 }
