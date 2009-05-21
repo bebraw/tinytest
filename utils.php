@@ -26,14 +26,4 @@ function loadFunctions( $file ) {
 
     return $added_funcs;
 }
-
-function getNchars( $n, $char ) {
-    $ret = "";
-
-    for($i=0; $i<$n; $i++) {
-        $ret .= $char;
-    }
-
-    return $ret;
-}
 ?>

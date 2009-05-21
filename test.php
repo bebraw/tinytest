@@ -1,5 +1,5 @@
 <?php
-function findTests() {
+function findTests() { # this can be run only once as TestFiles load functions!
     $dir = dirname(__FILE__);
     $dirHandler = opendir($dir);
     $tests = array();
@@ -15,15 +15,23 @@ function findTests() {
     return $tests;
 }
 
+function findFileInTests( $file, $tests ) {
+    foreach( $tests as $test ) {
+        if( $file == $test->fileName ) {
+            return $test;
+        }
+    }
+}
+
 function runTests( $tests ) {
     $testsPassed = 0;
     $testsRun = 0;
     
     foreach( $tests as $test ) {
-        print $test->fileName . " tests:\n";
         $test->run();
         $testsRun += $test->testsRun;
         $testsPassed += $test->testsPassed;
+        print "\n";
     }
 
     print "SUMMARY: " . $testsPassed . "/" . $testsRun . " tests passed.\n";
@@ -55,6 +63,8 @@ class TestFile {
         $this->testsPassed = 0;
         $this->testsRun = 0;
 
+        print $this->fileName . " tests:\n";
+
         foreach( $this->tests as $test ) {
             $testStr = "  " . $test . " ";
             print $testStr;
@@ -73,7 +83,7 @@ class TestFile {
             $this->testsRun++;
         }
 
-        print "  " . "Executed " . $this->testsRun . " tests.\n\n";
+        print "  " . "Executed " . $this->testsRun . " tests.\n";
     }
 
     private function loadTests() {

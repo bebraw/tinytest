@@ -3,11 +3,14 @@
 
 $author = "Juho Vepsäläinen";
 $programName = "TinyTest";
-$version = "0.04";
+$version = "0.05";
 
 require("argument.php");
+require("stringutils.php");
 require("test.php");
 require("utils.php");
+
+$tests = findTests();
 
 $application = new Application();
 $application->run();
@@ -20,7 +23,8 @@ class Application {
         global $argv;
 
         if( !findArguments($argv) ) {
-            $tests = findTests();
+            global $tests;
+            
             runTests($tests);
         }
     }
