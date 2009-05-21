@@ -106,7 +106,12 @@ class TestFile {
 		$this->testsRun = 0;
 		
 		foreach( $this->tests as $test ) {
-			print "  " . $test . " ";
+			$testStr = "  " . $test . " ";
+			print $testStr;
+			
+			$testStrLen = strlen($testStr);
+			print $this->getNchars(30-$testStrLen, " ");
+			
 			try {
 				$test();
 				print "OK";
@@ -119,6 +124,17 @@ class TestFile {
 		}
 		
 		print "  " . "Executed " . $this->testsRun . " tests.\n\n";
+	}
+	
+	# XXX: to utils!
+	private function getNchars( $n, $char ) {
+		$ret = "";
+		
+		for($i=0; $i<$n; $i++) {
+			$ret .= $char;
+		}
+		
+		return $ret;
 	}
 	
 	private function loadTests() {
