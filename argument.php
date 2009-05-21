@@ -3,21 +3,25 @@
 $possibleArgs = array(new File(), new Help(), new Loop(), );
 
 function findArguments( $args ) {
-    $foundArguments = false;
+    $foundArgs = array();
 
     foreach( $args as $arg ) {
         global $possibleArgs;
 
         foreach( $possibleArgs as $possibleArg ) {
             if( $possibleArg->matches($arg) ) {
-                $possibleArg->run();
-                $foundArguments = true;
-                break;
+                $foundArgs[] = $possibleArg;
             }
         }
     }
 
-    return $foundArguments;
+    foreach( $foundArgs as $foundArg ) {
+        $foundArg->run();
+    }
+
+    if( count($foundArgs) > 0 ) {
+        return true;
+    }
 }
 
 abstract class Argument {
@@ -44,18 +48,16 @@ abstract class Argument {
 
 class File extends Argument {
     public $renderable = false;
-    private $test;
 
-    public function run() {
-        $this->test->run(); # won't work with loop this way! rethink
-    }
+    public function run() {}
 
     public function matches( $argument ) {
         global $tests;
 
-        $this->test = findFileInTests($argument, $tests);
-
-        if( $this->test ) {
+        $test = findFileInTests($argument, $tests);
+        
+        if( $test ) {
+            $tests = array($test);
             return true;
         }
     }
@@ -86,7 +88,8 @@ class Loop extends Argument {
     public $helpText = "Execute tests automatically as files are changed.";
 
     public function run() {
-        $tests = findTests();
+        global $tests;
+
         runTests($tests);
 
         while(true) {
