@@ -3,7 +3,7 @@
 
 $author = "Juho Vepsäläinen";
 $programName = "TinyTest";
-$version = "0.05";
+$version = "0.06";
 
 require("argument.php");
 require("stringutils.php");

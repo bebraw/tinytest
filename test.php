@@ -1,12 +1,18 @@
 <?php
-function findTests() { # this can be run only once as TestFiles load functions!
-    $dir = dirname(__FILE__);
+function findTests( $dir=NULL ) { # this can be run only once as TestFiles load functions!
+    if( !$dir) {
+        $dir = dirname(__FILE__);
+    }
+    
     $dirHandler = opendir($dir);
     $tests = array();
 
     while( $fileName = readdir($dirHandler) ) {
-        if( preg_match("/_test.php$/", $fileName) ) {
-            $tests[] = new TestFile($fileName);
+        if( $fileName != "." and $fileName != ".." and is_dir($fileName) ) {
+            $tests = array_merge($tests, findTests($dir . "/" . $fileName));
+        }
+        else if( preg_match("/_test.php$/", $fileName) ) {
+            $tests[] = new TestFile($dir, $fileName);
         }
     }
 
@@ -38,25 +44,35 @@ function runTests( $tests ) {
 }
 
 class TestFile {
+    public $filePath;
     public $fileName;
     public $testsPassed;
     public $testsRun;
     private $lastModificationTime;
     private $tests;
 
-    public function __construct( $fileName ) {
+    public function __construct( $filePath, $fileName ) {
+        $this->filePath = $filePath;
         $this->fileName = $fileName;
         $this->updateModificationTime();
         $this->loadTests();
     }
 
-    public function updateModificationTime() {
-        $this->lastModificationTime = filemtime($this->fileName);
-    }
-
     public function hasBeenModified() {
         clearstatcache();
-        return $this->lastModificationTime != filemtime($this->fileName);
+        return $this->lastModificationTime != $this->getModificationTime();
+    }
+
+    public function updateModificationTime() {
+        $this->lastModificationTime = $this->getModificationTime();
+    }
+
+    private function getModificationTime() {
+        return filemtime($this->getWholeName());
+    }
+
+    private function getWholeName() {
+        return $this->filePath . "/" . $this->fileName;
     }
 
     public function run() {
@@ -87,7 +103,7 @@ class TestFile {
     }
 
     private function loadTests() {
-        $functions = loadFunctions($this->fileName);
+        $functions = loadFunctions($this->getWholeName());
         $tests = array();
 
         foreach( $functions as $function ) {

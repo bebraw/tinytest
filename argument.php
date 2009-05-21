@@ -1,5 +1,4 @@
 <?php
-
 $possibleArgs = array(new File(), new Help(), new Loop(), );
 
 function findArguments( $args ) {
@@ -46,6 +45,7 @@ abstract class Argument {
     }
 }
 
+# TODO: make this work if only test file is passed as arg!
 class File extends Argument {
     public $renderable = false;
 
