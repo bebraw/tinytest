@@ -1,12 +1,12 @@
 <?php
 $possibleArgs = array(new File(), new Help(), new Loop(), );
 
-function findArguments( $args ) {
+function constructArguments( $args ) {
     $foundArgs = array();
 
     foreach( $args as $arg ) {
         global $possibleArgs;
-
+        
         foreach( $possibleArgs as $possibleArg ) {
             if( $possibleArg->matches($arg) ) {
                 $foundArgs[] = $possibleArg;
@@ -14,21 +14,25 @@ function findArguments( $args ) {
         }
     }
 
-    foreach( $foundArgs as $foundArg ) {
-        $foundArg->run();
-    }
-
-    if( count($foundArgs) > 0 ) {
-        return true;
-    }
+    return $foundArgs;
 }
 
-abstract class Argument {
-    protected $callName;
+function inArguments( $name, $args ) {
+    foreach( $args as $arg ) {
+        if( $name == $arg->callName ) {
+            return $arg;
+        }
+    }
+
+    return new Argument();
+}
+
+class Argument {
+    public $callName;
     public $helpText;
     public $renderable = true;
 
-    abstract public function run();
+    public function run() {}
 
     public function getCallNames() {
         return array("-" . $this->callName[0], "--" . $this->callName);
@@ -45,11 +49,9 @@ abstract class Argument {
     }
 }
 
-# TODO: make this work if only test file is passed as arg!
 class File extends Argument {
+    public $callName = 'filename';
     public $renderable = false;
-
-    public function run() {}
 
     public function matches( $argument ) {
         global $tests;
@@ -64,7 +66,7 @@ class File extends Argument {
 }
 
 class Help extends Argument {
-    protected $callName = "help";
+    public $callName = "help";
     public $helpText = "Shows all available arguments.";
 
     public function run() {
@@ -84,13 +86,11 @@ class Help extends Argument {
 }
 
 class Loop extends Argument {
-    protected $callName = "loop";
+    public $callName = "loop";
     public $helpText = "Execute tests automatically as files are changed.";
 
     public function run() {
         global $tests;
-
-        runTests($tests);
 
         while(true) {
             sleep(1);

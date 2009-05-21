@@ -3,7 +3,7 @@
 
 $author = "Juho Vepsäläinen";
 $programName = "TinyTest";
-$version = "0.06";
+$version = "0.07";
 
 require("argument.php");
 require("stringutils.php");
@@ -21,11 +21,22 @@ class Application {
     }
     public function run() {
         global $argv;
+        $args = constructArguments($argv);
 
-        if( !findArguments($argv) ) {
+        $arg = inArguments("help", $args);
+        if( $arg->callName == "help" ) {
+            $arg->run();
+        }
+        else {
+            $arg = inArguments("filename", $args);
+            $arg->run();
+
+            print "running tests\n";
             global $tests;
-            
             runTests($tests);
+
+            $arg = inArguments("loop", $args);
+            $arg->run();
         }
     }
 }
