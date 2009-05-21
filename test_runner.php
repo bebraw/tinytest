@@ -6,6 +6,8 @@ $possibleArgs = array(new Help(), new Loop(), );
 $programName = "TinyTest";
 $version = "0.01";
 
+setup_assert();
+
 $fileLoader = new FileLoader();
 $argumentChecker = new ArgumentChecker();
 $argumentChecker->checkArguments($argv);
@@ -14,6 +16,20 @@ if( !$argumentChecker->foundArguments ) {
 	$testFinder = new TestFinder();
 	$testFinder->findTests();
 	$testFinder->executeTests();
+}
+
+function setup_assert() {
+	error_reporting(E_ALL | E_STRICT);
+	
+	function assert_callcack($file, $line, $message) {
+    		throw new Exception();
+	}
+	
+	assert_options(ASSERT_ACTIVE,     1);
+	assert_options(ASSERT_WARNING,    0);
+	assert_options(ASSERT_BAIL,       0);
+	assert_options(ASSERT_QUIET_EVAL, 0);
+	assert_options(ASSERT_CALLBACK,   'assert_callcack');
 }
 
 class FileLoader {
@@ -49,14 +65,19 @@ class TestFinder {
 	}
 	
 	public function executeTests() {
+		$testsRun = 0;
+		
 		foreach( $this->tests as $test ) {
-			$test->execute();
+			print $test->fileName . " tests:\n";
+			$testsRun += $test->execute();
 		}
+		
+		print "Executed " . $testsRun . " tests in total.\n";
 	}
 }
 
 class TestFile {
-	private $fileName;
+	public $fileName;
 	private $tests;
 	
 	public function __construct( $fileName ) {
@@ -66,9 +87,23 @@ class TestFile {
 	public function execute() {
 		$this->loadTests();
 		
+		$testsRun = 0;
+			
 		foreach( $this->tests as $test ) {
-			$test();
+			print "  " . $test . " ";
+			try {
+				$test();
+				print "OK";
+			} catch (Exception $e) {
+				print "FAILED " . $e->getMessage();
+			}
+			print "\n";
+			$testsRun++;
 		}
+		
+		print "  " . "Executed " . $testsRun . " tests.\n";
+		
+		return $testsRun;
 	}
 	
 	private function loadTests() {
