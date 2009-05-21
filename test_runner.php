@@ -14,8 +14,10 @@ $argumentChecker->checkArguments($argv);
 
 if( !$argumentChecker->foundArguments ) {
 	$testFinder = new TestFinder();
-	$testFinder->findTests();
-	$testFinder->executeTests();
+	$tests = $testFinder->findTests();
+	
+	$testRunner = new TestRunner($tests);
+	$testRunner->runTests();
 }
 
 function setup_assert() {
@@ -49,61 +51,74 @@ class FileLoader {
 }
 
 class TestFinder {
-	private $tests = array();
-	
 	public function findTests() {
 		$dir = dirname(__FILE__);
 		$dirHandler = opendir($dir);
+		$tests = array();
 		
 		while( $fileName = readdir($dirHandler) ) {
 			if( preg_match("/_test.php$/", $fileName) ) {
-				$this->tests[] = new TestFile($fileName);
+				$tests[] = new TestFile($fileName);
 			}
 		}
 		
 		closedir($dirHandler);
+		
+		return $tests;
+	}
+}
+
+class TestRunner {
+	private $tests;
+	
+	public function __construct( $tests ) {
+		$this->tests = $tests;
 	}
 	
-	public function executeTests() {
+	public function runTests() {
+		$testsPassed = 0;
 		$testsRun = 0;
 		
 		foreach( $this->tests as $test ) {
 			print $test->fileName . " tests:\n";
-			$testsRun += $test->execute();
+			$test->run();
+			$testsRun += $test->testsRun;
+			$testsPassed += $test->testsPassed;
 		}
 		
-		print "Executed " . $testsRun . " tests in total.\n";
+		print "SUMMARY: " . $testsPassed . "/" . $testsRun . " tests passed.\n";
 	}
 }
 
 class TestFile {
 	public $fileName;
+	public $testsPassed;
+	public $testsRun;
 	private $tests;
 	
 	public function __construct( $fileName ) {
 		$this->fileName = $fileName;
 	}
 	
-	public function execute() {
+	public function run() {
 		$this->loadTests();
+		$this->testsPassed = 0;
+		$this->testsRun = 0;
 		
-		$testsRun = 0;
-			
 		foreach( $this->tests as $test ) {
 			print "  " . $test . " ";
 			try {
 				$test();
 				print "OK";
+				$this->testsPassed++;
 			} catch (Exception $e) {
 				print "FAILED " . $e->getMessage();
 			}
 			print "\n";
-			$testsRun++;
+			$this->testsRun++;
 		}
 		
-		print "  " . "Executed " . $testsRun . " tests.\n";
-		
-		return $testsRun;
+		print "  " . "Executed " . $this->testsRun . " tests.\n\n";
 	}
 	
 	private function loadTests() {
