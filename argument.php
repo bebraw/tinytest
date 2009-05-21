@@ -1,4 +1,23 @@
 <?php
+/**
+ *    TinyTest - test runner
+ *    Copyright (C) 2009 Juho Vepsäläinen
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 $possibleArgs = array(new File(), new Help(), new Loop(), );
 
 function constructArguments( $args ) {
@@ -70,14 +89,19 @@ class Help extends Argument {
     public $helpText = "Shows all available arguments.";
 
     public function run() {
-        global $author, $possibleArgs, $programName, $version;
+        global $author, $possibleArgs, $programName, $version, $year;
+        $emptyArea = getNchars(4, ' ');
 
-        print $programName . " " . $version . " by " . $author . ".\n\n";
+        print $programName . " " . $version . " Copyright (C) " . $year . " " . $author . "\n\n";
+        print "Usage:\n";
+        print $emptyArea . "'tinytest.py <arguments> <filename>'\n";
+        print $emptyArea . "'tinytest.py <filename>'\n";
+        print $emptyArea . "'tinytest.py'\n\n";
         print "Possible arguments:\n";
         foreach( $possibleArgs as $possibleArg ) {
             if ( $possibleArg->renderable ) {
                 $callNames = $possibleArg->getCallNames();
-                $callNameStr = str_pad($callNames[0] . ", " . $callNames[1], 16, " ", STR_PAD_LEFT);
+                $callNameStr = $emptyArea . $callNames[0] . ", " . $callNames[1];
 
                 print $callNameStr . " - " . $possibleArg->helpText . "\n";
             }
@@ -87,7 +111,7 @@ class Help extends Argument {
 
 class Loop extends Argument {
     public $callName = "loop";
-    public $helpText = "Execute tests automatically as files are changed.";
+    public $helpText = "Executes tests automatically as tests are changed.";
 
     public function run() {
         global $tests;

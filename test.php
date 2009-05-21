@@ -1,4 +1,23 @@
 <?php
+/**
+ *    TinyTest - test runner
+ *    Copyright (C) 2009 Juho Vepsäläinen
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 function findTests( $dir=NULL ) { # this can be run only once as TestFiles load functions!
     if( !$dir) {
         $dir = dirname(__FILE__);
@@ -40,7 +59,7 @@ function runTests( $tests ) {
         print "\n";
     }
 
-    print "SUMMARY: " . $testsPassed . "/" . $testsRun . " tests passed.\n";
+    print "SUMMARY: " . $testsPassed . "/" . getTestAmount($testsRun)  . " passed.\n";
 }
 
 class TestFile {
@@ -99,7 +118,7 @@ class TestFile {
             $this->testsRun++;
         }
 
-        print "  " . "Executed " . $this->testsRun . " tests.\n";
+        print "  " . "Executed " . getTestAmount($this->testsRun) . ".\n";
     }
 
     private function loadTests() {
@@ -115,4 +134,13 @@ class TestFile {
         $this->tests = $tests;
     }
 }
+
+function getTestAmount( $amount ) {
+    if( $amount == 1) {
+        return $amount . " test";
+    }
+
+    return $amount . " tests";
+}
+
 ?>
