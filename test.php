@@ -18,7 +18,7 @@ function findTests() {
 function runTests( $tests ) {
     $testsPassed = 0;
     $testsRun = 0;
-
+    
     foreach( $tests as $test ) {
         print $test->fileName . " tests:\n";
         $test->run();
@@ -33,11 +33,22 @@ class TestFile {
     public $fileName;
     public $testsPassed;
     public $testsRun;
+    private $lastModificationTime;
     private $tests;
 
     public function __construct( $fileName ) {
         $this->fileName = $fileName;
+        $this->updateModificationTime();
         $this->loadTests();
+    }
+
+    public function updateModificationTime() {
+        $this->lastModificationTime = filemtime($this->fileName);
+    }
+
+    public function hasBeenModified() {
+        clearstatcache();
+        return $this->lastModificationTime != filemtime($this->fileName);
     }
 
     public function run() {

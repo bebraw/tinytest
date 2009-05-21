@@ -67,13 +67,26 @@ class Loop extends Argument {
         $tests = findTests();
         runTests($tests);
         
-        $psLine = fgets(STDIN, 1024);
-        $stdin = fopen("php://stdin", "r");
         while(true) {
-            runTests($tests);
-            
-            $l = fgets($stdin);
+            sleep(1);
+            if( testsHaveChanged( $tests ) ) {
+                exit(); # tinytest.py makes sure that the script gets run again!
+            }
         }
     }
 }
+
+function testsHaveChanged( $tests ) {
+    $testsChanged = false;
+
+    foreach( $tests as $test ) {
+        if( $test->hasBeenModified() == true ) {
+            $test->updateModificationTime();
+            $testsChanged = true;
+        }
+    }
+
+    return $testsChanged;
+}
+
 ?>
