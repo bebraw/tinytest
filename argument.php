@@ -129,16 +129,11 @@ class Loop extends Argument {
     }
 
     private function testsHaveChanged( $tests ) {
-        $testsChanged = false;
-
         foreach( $tests as $test ) {
             if( $test->hasBeenModified() == true ) {
-                $test->updateModificationTime();
-                $testsChanged = true;
+                return true;
             }
         }
-
-        return $testsChanged;
     }
 }
 ?>

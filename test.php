@@ -73,17 +73,13 @@ class TestFile {
     public function __construct( $filePath, $fileName ) {
         $this->filePath = $filePath;
         $this->fileName = $fileName;
-        $this->updateModificationTime();
+        $this->lastModificationTime = $this->getModificationTime();
         $this->loadTests();
     }
 
     public function hasBeenModified() {
         clearstatcache();
         return $this->lastModificationTime != $this->getModificationTime();
-    }
-
-    public function updateModificationTime() {
-        $this->lastModificationTime = $this->getModificationTime();
     }
 
     private function getModificationTime() {
