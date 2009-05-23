@@ -18,7 +18,7 @@
  *
  */
 
-function setup_assert() {
+function initializeAssert() {
     error_reporting(E_ALL | E_STRICT);
 
     function assert_callcack($file, $line, $message) {

@@ -21,7 +21,7 @@
 
 $author = "Juho Vepsäläinen";
 $programName = "TinyTest";
-$version = "0.15";
+$version = "0.16";
 $year = 2009;
 
 /**
@@ -35,32 +35,38 @@ require("test.php");
 require("utils.php");
 
 $tests = findTests();
-
-$application = new Application();
+$application = new Application( $tests );
 $application->run();
 
 class Application {
-    public function __construct() {
-        setup_assert();
+    private $tests;
+
+    public function __construct( $tests ) {
+        $this->tests = $tests;
+        initializeAssert();
+        initializePossibleArgs( $this->tests );
     }
+
     public function run() {
         global $argv;
-        $args = constructArguments($argv);
 
-        $arg = inArguments("help", $args);
-        if( $arg->callName == "help" ) {
-            $arg->run();
+        $args = constructArguments($argv);
+        $matchingArgs = inArguments("help", $args);
+        if( $matchingArgs->found ) {
+            $matchingArgs->run();
         }
         else {
-            $arg = inArguments("filename", $args);
-            $arg->run();
+            $matchingArgs = inArguments("filename", $args);
 
-            print "running tests\n";
-            global $tests;
-            runTests($tests);
-
-            $arg = inArguments("loop", $args);
-            $arg->run();
+            if( $matchingArgs->found ) {
+                $matchingArgs->run();
+            }
+            else {
+                runTests($this->tests);
+            }
+            
+            $matchingArgs = inArguments("loop", $args);
+            $matchingArgs->run();
         }
     }
 }

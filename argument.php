@@ -20,6 +20,14 @@
 
 $possibleArgs = array(new File(), new Help(), new Loop(), );
 
+function initializePossibleArgs( $tests ) {
+    global $possibleArgs;
+
+    foreach( $possibleArgs as $possibleArg ) {
+        $possibleArg->tests = $tests;
+    }
+}
+
 function constructArguments( $args ) {
     $foundArgs = array();
 
@@ -37,21 +45,40 @@ function constructArguments( $args ) {
 }
 
 function inArguments( $name, $args ) {
+    $matchingArgs = array();
+
     foreach( $args as $arg ) {
         if( $name == $arg->callName ) {
-            return $arg;
+            $matchingArgs[] = $arg;
         }
     }
 
-    return new Argument();
+    return new MatchingArguments( $matchingArgs );
 }
 
-class Argument {
+class MatchingArguments {
+    public $found;
+    private $args;
+
+    public function __construct( $args ) {
+        $this->args = $args;
+        $this->found = count($this->args) > 0;
+    }
+
+    public function run() {
+        foreach( $this->args as $arg ) {
+            $arg->run();
+        }
+    }
+}
+
+abstract class Argument {
     public $callName;
     public $helpText;
     public $renderable = true;
+    public $tests;
 
-    public function run() {}
+    abstract public function run();
 
     public function getCallNames() {
         return array("-" . $this->callName[0], "--" . $this->callName);
@@ -72,13 +99,15 @@ class File extends Argument {
     public $callName = 'filename';
     public $renderable = false;
 
-    public function matches( $argument ) {
-        global $tests;
+    public function run() {
+        runTests($this->tests);
+    }
 
-        $test = findFileInTests($argument, $tests);
+    public function matches( $argument ) {
+        $test = findFileInTests($argument, $this->tests);
         
         if( $test ) {
-            $tests = array($test);
+            $this->tests = array($test);
             return true;
         }
     }
@@ -89,18 +118,19 @@ class Help extends Argument {
     public $helpText = "Shows all available arguments.";
 
     public function run() {
-        global $author, $possibleArgs, $programName, $version, $year;
+        global $author, $programName, $version, $year, $possibleArgs;
         $emptyArea = getNchars(4, ' ');
 
         print $programName . " " . $version . " Copyright (C) " . $year . " " . $author . "\n\n";
         print "Usage:\n";
         print $emptyArea . "'tinytest.py <arguments> <filename>'\n";
-        print $emptyArea . "'tinytest.py <filename>'\n";
+        print $emptyArea . "'tinytest.py <filename>' (Passing multiple filenames works too.)\n";
         print $emptyArea . "'tinytest.py'\n\n";
         print "Note that test files must be named using 'test' suffix (ie. utils_test.php).\n";
         print "Test functions contained in the test files must have 'test' prefix (ie. test_sum).\n";
         print "Test classes must be named using 'Test' prefix (ie. TestVector). Methods must be \n";
         print "named in the same manner as functions.\n\n";
+        
         print "Possible arguments:\n";
         foreach( $possibleArgs as $possibleArg ) {
             if ( $possibleArg->renderable ) {
@@ -118,11 +148,9 @@ class Loop extends Argument {
     public $helpText = "Executes tests automatically as tests are changed.";
 
     public function run() {
-        global $tests;
-
         while(true) {
             sleep(1);
-            if( $this->testsHaveChanged( $tests ) ) {
+            if( $this->testsHaveChanged( $this->tests ) ) {
                 exit(); # tinytest.py makes sure that the script gets run again!
             }
         }
