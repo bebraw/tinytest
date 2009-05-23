@@ -100,14 +100,14 @@ class FileArgument extends Argument {
     public $renderable = false;
 
     public function run() {
-        runTests($this->tests);
+        $this->tests->run();
     }
 
     public function matches( $argument ) {
-        $test = findFileInTests($argument, $this->tests);
+        $test = $this->tests->findFile($argument);
 
         if( $test ) {
-            $this->tests = array($test);
+            $this->tests = new Tests(array($test));
             return true;
         }
     }
@@ -146,7 +146,7 @@ class HelpArgument extends Argument {
 class LoopArgument extends Argument {
     public $callName = "loop";
     public $helpText = "Executes tests automatically as files are changed.";
-    private $includes = array();
+    private $includes;
 
     public function run() {
         while(true) {
@@ -162,39 +162,37 @@ class LoopArgument extends Argument {
         $matched = parent::matches($argument);
 
         if( $matched ) {
-            $includes = get_included_files();
-
-            foreach( $includes as $include ) {
-                $this->includes[] = new File($include);
-            }
+            $this->includes = new Includes(get_included_files());
         }
 
         return $matched;
     }
 
     private function filesHaveChanged() {
-        return $this->testsHaveChanged() or $this->includedFilesHaveChanged();
-    }
-
-    private function testsHaveChanged() {
-        foreach( $this->tests as $test ) {
-            if( $test->hasBeenModified() == true ) {
-                return true;
-            }
-        }
-    }
-
-    private function includedFilesHaveChanged() {
-        foreach( $this->includes as $include ) {
-            if( $include->hasBeenModified() == true ) {
-                return true;
-            }
-        }
+        return $this->tests->haveChanged() or $this->includes->haveChanged();
     }
 
     public function inArguments( $args ) {
         $callNames = $this->getCallNames();
         return in_array($callNames[0], $args) or in_array($callNames[1], $args);
+    }
+}
+
+class Includes {
+    private $includes = array();
+
+    public function __construct( $includes ) {
+        foreach( $includes as $include ) {
+            $this->includes[] = new File($include);
+        }
+    }
+
+    public function haveChanged() {
+        foreach( $this->includes as $include ) {
+            if( $include->hasBeenModified() == true ) {
+                return true;
+            }
+        }
     }
 }
 ?>

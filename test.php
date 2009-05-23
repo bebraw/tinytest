@@ -18,20 +18,22 @@
  *
  */
 
-function findTests( $dir=NULL ) { # this can be run only once as TestFiles load functions!
-    if( !$dir) {
+function findTests( $dir=NULL, &$tests=NULL ) { # this can be run only once as TestFiles load functions!
+    if( !$dir ) {
         $dir = dirname(__FILE__);
+    }
+    
+    if( !$tests ) {
+        $tests = new Tests();
     }
 
     $dirHandler = opendir($dir);
-    $tests = array();
-
     while( $fileName = readdir($dirHandler) ) {
         if( $fileName != "." and $fileName != ".." and is_dir($fileName) ) {
-            $tests = array_merge($tests, findTests($dir . "/" . $fileName));
+            findTests($dir . "/" . $fileName, $tests);
         }
         else if( preg_match("/_test.php$/", $fileName) ) {
-                $tests[] = new TestFile($dir . "/" . $fileName);
+                $tests->append($dir . "/" . $fileName);
             }
     }
 
@@ -40,26 +42,42 @@ function findTests( $dir=NULL ) { # this can be run only once as TestFiles load 
     return $tests;
 }
 
-function findFileInTests( $file, $tests ) {
-    foreach( $tests as $test ) {
-        if( $file == $test->getFilename() ) {
-            return $test;
+class Tests {
+    private $tests = array();
+    
+    public function append( $file ) {
+        $this->tests[] = new TestFile($file);
+    }
+
+    public function findFile( $file ) {
+        foreach( $this->tests as $test ) {
+            if( $file == $test->getFilename() ) {
+                return $test;
+            }
         }
     }
-}
 
-function runTests( $tests ) {
-    $testsPassed = 0;
-    $testsRun = 0;
+    public function run() {
+        $testsPassed = 0;
+        $testsRun = 0;
 
-    foreach( $tests as $test ) {
-        $test->run();
-        $testsRun += $test->testsRun;
-        $testsPassed += $test->testsPassed;
-        print "\n";
+        foreach( $this->tests as $test ) {
+            $test->run();
+            $testsRun += $test->testsRun;
+            $testsPassed += $test->testsPassed;
+            print "\n";
+        }
+
+        print "SUMMARY: " . $testsPassed . "/" . getTestAmount($testsRun)  . " passed.\n";
     }
 
-    print "SUMMARY: " . $testsPassed . "/" . getTestAmount($testsRun)  . " passed.\n";
+    public function haveChanged() {
+        foreach( $this->tests as $test ) {
+            if( $test->hasBeenModified() == true ) {
+                return true;
+            }
+        }
+    }
 }
 
 class File {
@@ -136,7 +154,7 @@ class TestFile extends File {
                 }
             }
         }
-        
+
         foreach( $functions as $function ) {
             if( preg_match("/^test_/", $function) ) {
                 $this->tests[] = new TestFunction($function);

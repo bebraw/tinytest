@@ -57,7 +57,7 @@ class Application {
                 $matchingArgs->run();
             }
             else {
-                runTests($this->tests);
+                $this->tests->run();
             }
             
             $matchingArgs = inArguments("loop", $args);
