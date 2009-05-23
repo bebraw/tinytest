@@ -80,7 +80,7 @@ abstract class Argument {
 
     abstract public function run();
 
-    public function getCallNames() {
+    protected function getCallNames() {
         return array("-" . $this->callName[0], "--" . $this->callName);
     }
 
@@ -153,7 +153,7 @@ class LoopArgument extends Argument {
             sleep(1);
 
             if( $this->filesHaveChanged() ) {
-                exit(1); # tinytest.py makes sure that the script gets run again!
+                exit(); # tinytest.py makes sure that the script gets run again!
             }
         }
     }
@@ -190,6 +190,11 @@ class LoopArgument extends Argument {
                 return true;
             }
         }
+    }
+
+    public function inArguments( $args ) {
+        $callNames = $this->getCallNames();
+        return in_array($callNames[0], $args) or in_array($callNames[1], $args);
     }
 }
 ?>
