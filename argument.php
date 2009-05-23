@@ -18,7 +18,7 @@
  *
  */
 
-$possibleArgs = array(new File(), new Help(), new Loop(), );
+$possibleArgs = array(new FileArgument(), new HelpArgument(), new LoopArgument(), );
 
 function initializePossibleArgs( $tests ) {
     global $possibleArgs;
@@ -33,7 +33,7 @@ function constructArguments( $args ) {
 
     foreach( $args as $arg ) {
         global $possibleArgs;
-        
+
         foreach( $possibleArgs as $possibleArg ) {
             if( $possibleArg->matches($arg) ) {
                 $foundArgs[] = $possibleArg;
@@ -95,7 +95,7 @@ abstract class Argument {
     }
 }
 
-class File extends Argument {
+class FileArgument extends Argument {
     public $callName = 'filename';
     public $renderable = false;
 
@@ -105,7 +105,7 @@ class File extends Argument {
 
     public function matches( $argument ) {
         $test = findFileInTests($argument, $this->tests);
-        
+
         if( $test ) {
             $this->tests = array($test);
             return true;
@@ -113,7 +113,7 @@ class File extends Argument {
     }
 }
 
-class Help extends Argument {
+class HelpArgument extends Argument {
     public $callName = "help";
     public $helpText = "Shows all available arguments.";
 
@@ -130,7 +130,7 @@ class Help extends Argument {
         print "Test functions contained in the test files must have 'test' prefix (ie. test_sum).\n";
         print "Test classes must be named using 'Test' prefix (ie. TestVector). Methods must be \n";
         print "named in the same manner as functions.\n\n";
-        
+
         print "Possible arguments:\n";
         foreach( $possibleArgs as $possibleArg ) {
             if ( $possibleArg->renderable ) {
@@ -143,22 +143,50 @@ class Help extends Argument {
     }
 }
 
-class Loop extends Argument {
+class LoopArgument extends Argument {
     public $callName = "loop";
-    public $helpText = "Executes tests automatically as tests are changed.";
+    public $helpText = "Executes tests automatically as files are changed.";
+    private $includes = array();
 
     public function run() {
         while(true) {
             sleep(1);
-            if( $this->testsHaveChanged( $this->tests ) ) {
-                exit(); # tinytest.py makes sure that the script gets run again!
+
+            if( $this->filesHaveChanged() ) {
+                exit(1); # tinytest.py makes sure that the script gets run again!
             }
         }
     }
 
-    private function testsHaveChanged( $tests ) {
-        foreach( $tests as $test ) {
+    public function matches( $argument ) {
+        $matched = parent::matches($argument);
+
+        if( $matched ) {
+            $includes = get_included_files();
+
+            foreach( $includes as $include ) {
+                $this->includes[] = new File($include);
+            }
+        }
+
+        return $matched;
+    }
+
+    private function filesHaveChanged() {
+        return $this->testsHaveChanged() or $this->includedFilesHaveChanged();
+    }
+
+    private function testsHaveChanged() {
+        foreach( $this->tests as $test ) {
             if( $test->hasBeenModified() == true ) {
+                return true;
+            }
+        }
+    }
+
+    private function includedFilesHaveChanged() {
+        foreach( $this->includes as $include ) {
+            if( $include->hasBeenModified() == true ) {
                 return true;
             }
         }

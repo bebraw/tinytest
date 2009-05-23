@@ -21,13 +21,8 @@
 
 $author = "Juho Vepsäläinen";
 $programName = "TinyTest";
-$version = "0.16";
+$version = "0.20";
 $year = 2009;
-
-/**
- * TODO:
- * -make loop work with changes made to tested files too!
- */
 
 require("argument.php");
 require("stringutils.php");
@@ -68,6 +63,8 @@ class Application {
             $matchingArgs = inArguments("loop", $args);
             $matchingArgs->run();
         }
+
+        print "quit\n";
     }
 }
 ?>

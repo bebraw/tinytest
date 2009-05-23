@@ -31,7 +31,7 @@ function findTests( $dir=NULL ) { # this can be run only once as TestFiles load 
             $tests = array_merge($tests, findTests($dir . "/" . $fileName));
         }
         else if( preg_match("/_test.php$/", $fileName) ) {
-                $tests[] = new TestFile($dir, $fileName);
+                $tests[] = new TestFile($dir . "/" . $fileName);
             }
     }
 
@@ -42,7 +42,7 @@ function findTests( $dir=NULL ) { # this can be run only once as TestFiles load 
 
 function findFileInTests( $file, $tests ) {
     foreach( $tests as $test ) {
-        if( $file == $test->fileName ) {
+        if( $file == $test->getFilename() ) {
             return $test;
         }
     }
@@ -62,19 +62,17 @@ function runTests( $tests ) {
     print "SUMMARY: " . $testsPassed . "/" . getTestAmount($testsRun)  . " passed.\n";
 }
 
-class TestFile {
-    public $filePath;
-    public $fileName;
-    public $testsPassed;
-    public $testsRun;
+class File {
+    public $file; /* whole path to file and the filename */
     private $lastModificationTime;
-    private $tests;
 
-    public function __construct( $filePath, $fileName ) {
-        $this->filePath = $filePath;
-        $this->fileName = $fileName;
+    public function __construct( $file ) {
+        $this->file = $file;
         $this->lastModificationTime = $this->getModificationTime();
-        $this->loadTests();
+    }
+
+    public function getFilename() {
+        return substr(strrchr($this->file, "/"), 1);
     }
 
     public function hasBeenModified() {
@@ -83,18 +81,25 @@ class TestFile {
     }
 
     private function getModificationTime() {
-        return filemtime($this->getWholeName());
+        return filemtime($this->file);
     }
+}
 
-    private function getWholeName() {
-        return $this->filePath . "/" . $this->fileName;
+class TestFile extends File {
+    public $testsPassed;
+    public $testsRun;
+    public $tests;
+
+    public function __construct( $file ) {
+        parent::__construct($file);
+        $this->loadTests();
     }
 
     public function run() {
         $this->testsPassed = 0;
         $this->testsRun = 0;
 
-        print $this->fileName . " tests:\n";
+        print $this->getFilename() . " tests:\n";
 
         foreach( $this->tests as $test ) {
             $testStr = "  " . $test->name . " ";
@@ -119,7 +124,7 @@ class TestFile {
 
     private function loadTests() {
         $this->tests = array();
-        list ($classes, $functions) = loadClassesAndFunctions($this->getWholeName());
+        list ($classes, $functions) = loadClassesAndFunctions($this->file);
 
         foreach( $classes as $class ) {
             if( preg_match("/^Test/", $class) ) {
