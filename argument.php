@@ -70,6 +70,10 @@ class MatchingArguments {
             $arg->run();
         }
     }
+
+    public function runOnce() {
+        $this->args[0]->run();
+    }
 }
 
 abstract class Argument {

@@ -48,7 +48,7 @@ class Application {
         $args = constructArguments($argv);
         $matchingArgs = inArguments("help", $args);
         if( $matchingArgs->found ) {
-            $matchingArgs->run();
+            $matchingArgs->runOnce();
         }
         else {
             $matchingArgs = inArguments("filename", $args);
@@ -61,7 +61,7 @@ class Application {
             }
             
             $matchingArgs = inArguments("loop", $args);
-            $matchingArgs->run();
+            $matchingArgs->runOnce();
         }
 
         print "quit\n";
