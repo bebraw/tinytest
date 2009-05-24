@@ -1,0 +1,6 @@
+-setUp and tearDown for test classes (execute these before and after each test)
+-code coverage tools?
+-mock testing tools?
+-ncurses ui (alternative)
+-better tests!
+-write INSTALL and installer
