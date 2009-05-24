@@ -72,7 +72,9 @@ class MatchingArguments {
     }
 
     public function runOnce() {
-        $this->args[0]->run();
+        if( array_key_exists(0, $this->args) ) {
+            $this->args[0]->run();
+        }
     }
 }
 
@@ -131,7 +133,7 @@ class HelpArgument extends Argument {
         print $emptyArea . "'tinytest.py <filename>' (Passing multiple filenames works too.)\n";
         print $emptyArea . "'tinytest.py'\n\n";
         print "Note that test files must be named using 'test' suffix (ie. utils_test.php).\n";
-        print "Test functions contained in the test files must have 'test' prefix (ie. test_sum).\n";
+        print "Test functions contained in the test files must have 'test' prefix (ie. testSum).\n";
         print "Test classes must be named using 'Test' prefix (ie. TestVector). Methods must be \n";
         print "named in the same manner as functions.\n\n";
 

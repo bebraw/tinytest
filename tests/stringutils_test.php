@@ -20,7 +20,7 @@
 
 #require('stringutils.php'); # application has this!
 
-function test_getNchars() {
+function testGetNchars() {
     assert("getNchars(5, 's') == 'sssss'");
 }
 ?>

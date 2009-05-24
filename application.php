@@ -21,7 +21,7 @@
 
 $author = "Juho Vepsäläinen";
 $programName = "TinyTest";
-$version = "0.25";
+$version = "0.26";
 $year = 2009;
 
 require("argument.php");

@@ -20,7 +20,7 @@
 
 #require('utils.php'); # application has this!
 
-function test_initializeAssert() {
+function testInitializeAssert() {
     # note that the test runner has already ran this function!
 
     $e = NULL;

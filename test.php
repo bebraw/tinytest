@@ -22,7 +22,7 @@ function findTests( $dir=NULL, &$tests=NULL ) { # this can be run only once as T
     if( !$dir ) {
         $dir = dirname(__FILE__);
     }
-    
+
     if( !$tests ) {
         $tests = new Tests();
     }
@@ -44,7 +44,7 @@ function findTests( $dir=NULL, &$tests=NULL ) { # this can be run only once as T
 
 class Tests {
     private $tests = array();
-    
+
     public function append( $file ) {
         $this->tests[] = new TestFile($file);
     }
@@ -145,21 +145,29 @@ class TestFile extends File {
         list ($classes, $functions) = loadClassesAndFunctions($this->file);
 
         foreach( $classes as $class ) {
-            if( preg_match("/^Test/", $class) ) {
+            if( $this->matchClass($class) ) {
                 $methods = get_class_methods($class);
                 foreach( $methods as $method ) {
-                    if( preg_match("/^test_/", $method) ) {
+                    if( $this->matchTest($method) ) {
                         $this->tests[] = new TestMethod($method, $class);
                     }
                 }
             }
         }
-
+        
         foreach( $functions as $function ) {
-            if( preg_match("/^test_/", $function) ) {
+            if( $this->matchTest($function) ) {
                 $this->tests[] = new TestFunction($function);
             }
         }
+    }
+
+    private function matchClass( $class ) {
+        return preg_match("/^Test/", $class);
+    }
+
+    private function matchTest( $name ) {
+        return preg_match("/^test/", $name);
     }
 }
 

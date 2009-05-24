@@ -21,7 +21,7 @@
 require("vector.php");
 
 class TestVector {
-    function test_create() {
+    function testCreate() {
         $vector = new Vector(0.0, 0.0, 0.0, 0.0);
 
         assert("$vector->x == 0");
