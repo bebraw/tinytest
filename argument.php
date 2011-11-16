@@ -110,9 +110,9 @@ class HelpArgument extends Argument {
 
         print $programName . " " . $version . " Copyright (C) " . $year . " " . $author . "\n\n";
         print "Usage:\n";
-        print $emptyArea . "'tinytest.py <arguments> <filename>'\n";
-        print $emptyArea . "'tinytest.py <filename>' (Passing multiple filenames works too.)\n";
-        print $emptyArea . "'tinytest.py'\n\n";
+        print $emptyArea . "'tinytest.php <arguments> <filename>'\n";
+        print $emptyArea . "'tinytest.php <filename>' (Passing multiple filenames works too.)\n";
+        print $emptyArea . "'tinytest.php'\n\n";
         print "Note that test files must be named using 'test' suffix (ie. utils_test.php).\n";
         print "Test functions contained in the test files must have 'test' prefix (ie. testSum).\n";
         print "Test classes must be named using 'Test' prefix (ie. TestVector). Methods must be \n";
